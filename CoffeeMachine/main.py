@@ -49,7 +49,7 @@ def print_report():
         Water: {resources['water']}ml
         Milk: {resources['milk']}ml
         Coffee: {resources['coffee']}g
-        Money: ${money}\
+        Money: ${money:.2f}\
     """))
 
 
@@ -58,15 +58,15 @@ def enough_money(drink, amount_given):
 
 
 def enough_water(drink):
-    return resources['water'] >= MENU[drink]['ingredients']['water']
+    return resources['water'] >= MENU[drink]['ingredients'].get('water', 0)
 
 
 def enough_milk(drink):
-    return resources['milk'] >= MENU[drink]['ingredients']['milk']
+    return resources['milk'] >= MENU[drink]['ingredients'].get('milk', 0)
 
 
 def enough_coffee(drink):
-    return resources['coffee'] >= MENU[drink]['ingredients']['coffee']
+    return resources['coffee'] >= MENU[drink]['ingredients'].get('coffee', 0)
 
 
 def enough_resources(drink):
@@ -101,7 +101,7 @@ def ask_coins():
     n_dimes = int(input("How many dimes?: "))
     n_nickels = int(input("How many nickels?: "))
     n_pennies = int(input("How many pennies?: "))
-    return n_quarters * 0.25 + n_dimes * 0.10 + n_nickels * 0.5 + n_pennies * 0.01
+    return n_quarters * 0.25 + n_dimes * 0.10 + n_nickels * 0.05 + n_pennies * 0.01
 
 
 def make_coffee(drink):
@@ -131,16 +131,17 @@ def make_coffee(drink):
     # At this point we have both enough ingredients and money -- make the coffee
 
     # Subtract the ingredients from the machine
-    resources['water'] -= MENU[drink]['ingredients']['water']
-    resources['milk'] -= MENU[drink]['ingredients']['milk']
-    resources['coffee'] -= MENU[drink]['ingredients']['coffee']
+    resources['water'] -= MENU[drink]['ingredients'].get('water', 0)
+    resources['milk'] -= MENU[drink]['ingredients'].get('milk', 0)
+    resources['coffee'] -= MENU[drink]['ingredients'].get('coffee', 0)
 
     # Add the money to the machine
     cost = MENU[drink]['cost']
+    change = amount_given - cost
     money += cost
 
     # Print response messages
-    print(f"Here is ${cost} in change.")
+    print(f"Here is ${change:.2f} in change.")
     print(f"Here is your {drink} ☕ Enjoy!")
 
 
