@@ -58,15 +58,15 @@ def enough_money(drink, amount_given):
 
 
 def enough_water(drink):
-    return resources[drink] >= MENU[drink]['ingredients']['water']
+    return resources['water'] >= MENU[drink]['ingredients']['water']
 
 
 def enough_milk(drink):
-    return resources[drink] >= MENU[drink]['ingredients']['milk']
+    return resources['milk'] >= MENU[drink]['ingredients']['milk']
 
 
 def enough_coffee(drink):
-    return resources[drink] >= MENU[drink]['ingredients']['coffee']
+    return resources['coffee'] >= MENU[drink]['ingredients']['coffee']
 
 
 def enough_resources(drink):
