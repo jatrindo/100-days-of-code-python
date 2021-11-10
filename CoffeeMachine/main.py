@@ -57,36 +57,18 @@ def enough_money(drink, amount_given):
     return amount_given >= MENU[drink]['cost']
 
 
-def enough_water(drink):
-    return resources['water'] >= MENU[drink]['ingredients'].get('water', 0)
-
-
-def enough_milk(drink):
-    return resources['milk'] >= MENU[drink]['ingredients'].get('milk', 0)
-
-
-def enough_coffee(drink):
-    return resources['coffee'] >= MENU[drink]['ingredients'].get('coffee', 0)
-
-
-def enough_resources(drink):
+def enough_resources(required_ingredients):
     """
     Checks if we have enough resources to make the specified drink.
 
-    :param drink: The coffee we want to check whether we have enough ingredients for
+    :param required_ingredients: A dict representing the resources required to make the drink. Keys are ingredient
+    names, values are ints
     :return: True if there are enough ingredients, otherwise print an error message and return False
     """
-    if not enough_water(drink):
-        print("Sorry, there is not enough water.")
-        return False
-
-    if not enough_milk(drink):
-        print("Sorry, there is not enough milk.")
-        return False
-
-    if not enough_coffee(drink):
-        print("Sorry, there is not enough coffee.")
-        return False
+    for ingredient in required_ingredients:
+        if required_ingredients[ingredient] >= resources[ingredient]:
+            print(f"Sorry, there is not enough {ingredient}.")
+            return False
 
     return True
 
@@ -120,7 +102,8 @@ def make_coffee(drink):
     """
     global resources, money
 
-    if not enough_resources(drink):
+    drink_ingredients = MENU[drink]['ingredients']
+    if not enough_resources(drink_ingredients):
         return
 
     amount_given = ask_coins()
@@ -131,9 +114,8 @@ def make_coffee(drink):
     # At this point we have both enough ingredients and money -- make the coffee
 
     # Subtract the ingredients from the machine
-    resources['water'] -= MENU[drink]['ingredients'].get('water', 0)
-    resources['milk'] -= MENU[drink]['ingredients'].get('milk', 0)
-    resources['coffee'] -= MENU[drink]['ingredients'].get('coffee', 0)
+    for ingredient in drink_ingredients:
+        resources[ingredient] -= drink_ingredients[ingredient]
 
     # Add the money to the machine
     cost = MENU[drink]['cost']
@@ -146,9 +128,10 @@ def make_coffee(drink):
 
 
 while True:
-    response = input("What would you like? (espresso/latte/cappuccino): ").lower()
+    options = '/'.join(MENU.keys())
+    response = input(f"What would you like? ({options}): ").lower()
 
-    if response == 'espresso' or response == 'latte' or response == 'cappuccino':
+    if MENU.get(response):
         make_coffee(response)
     elif response == 'report':
         print_report()
