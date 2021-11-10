@@ -39,9 +39,9 @@ money = 0.0
 # 2. Turn off the Coffee Machine by entering "off" to the prompt.
 # 3. Print report of all coffee machine resources
 # 4. Check resources are sufficient to make drink order
-# TODO: 5. Process coins.
-# TODO: 6. Check that the transaction is successful (i.e. enough resources + money)
-# TODO: 7. Make the coffee if the transaction is successful
+# 5. Process coins.
+# 6. Check that the transaction is successful (i.e. enough resources + money)
+# 7. Make the coffee if the transaction is successful
 
 
 def print_report():
@@ -91,15 +91,67 @@ def enough_resources(drink):
     return True
 
 
+def ask_coins():
+    """
+    Asks the user the amount of quarters, dimes, nickels, and pennies they want to insert, in that order.
+
+    :return: Float representing the total amount given, in dollars and cents.
+    """
+    n_quarters = int(input("How many quarters?: "))
+    n_dimes = int(input("How many dimes?: "))
+    n_nickels = int(input("How many nickels?: "))
+    n_pennies = int(input("How many pennies?: "))
+    return n_quarters * 0.25 + n_dimes * 0.10 + n_nickels * 0.5 + n_pennies * 0.01
+
+
+def make_coffee(drink):
+    """
+    Attempts to make the specified drink.
+
+    Succeeds if there are enough ingredients are present and if enough money is given.
+
+    If successful, the required ingredients are subtracted from the coffee machine's resources, and the cost of the
+    drink is added to the coffee machine.
+
+    If not successful, an error message is printed, no ingredients are removed, and no money is added.
+
+    :param drink: The drink to make (assumes valid drink)
+    :return: None (but affects the state of the coffee machine)
+    """
+    global resources, money
+
+    if not enough_resources(drink):
+        return
+
+    amount_given = ask_coins()
+    if not enough_money(drink, amount_given):
+        print("Sorry, that's not enough money. Money refunded.")
+        return
+
+    # At this point we have both enough ingredients and money -- make the coffee
+
+    # Subtract the ingredients from the machine
+    resources['water'] -= MENU[drink]['ingredients']['water']
+    resources['milk'] -= MENU[drink]['ingredients']['milk']
+    resources['coffee'] -= MENU[drink]['ingredients']['coffee']
+
+    # Add the money to the machine
+    cost = MENU[drink]['cost']
+    money += cost
+
+    # Print response messages
+    print(f"Here is ${cost} in change.")
+    print(f"Here is your {drink} ☕ Enjoy!")
+
+
 while True:
     response = input("What would you like? (espresso/latte/cappuccino): ").lower()
 
     if response == 'espresso' or response == 'latte' or response == 'cappuccino':
-        pass
+        make_coffee(response)
     elif response == 'report':
         print_report()
     elif response == 'off':
         break
     else:
         print("Please make a valid selection")
-
