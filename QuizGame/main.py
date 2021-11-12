@@ -9,4 +9,6 @@ for qdata in question_data:
     question_bank.append(Question(text, answer))
 
 qbrain = QuizBrain(question_bank)
-qbrain.next_question()
+
+while qbrain.still_has_questions():
+    qbrain.next_question()
