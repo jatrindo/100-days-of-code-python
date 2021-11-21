@@ -49,10 +49,7 @@ while len(guessed_states) < len(state_df):
 
 # Write out states missed for further review
 if len(guessed_states) < len(states):
-    states_to_learn = []
-    for state in states:
-        if state not in guessed_states:
-            states_to_learn.append(state)
+    states_to_learn = [state for state in states if (state not in guessed_states)]
 
     df = pandas.DataFrame({
         'states': states_to_learn
