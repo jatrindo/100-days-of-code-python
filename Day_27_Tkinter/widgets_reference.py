@@ -1,5 +1,7 @@
 import tkinter
 
+"""Reference for various Tkinter widgets widget.pack()"""
+
 # Creating a new window and configurations
 window = tkinter.Tk()
 window.title("Widget Examples")
