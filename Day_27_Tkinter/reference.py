@@ -15,6 +15,9 @@ label.pack()
 # Buttons
 def action():
     print("Do something")
+    print(text.get("2.0", "3.5"))
+    # ^ Start Index, End Index
+    # ^ Index = f"{LineNo}.{NumChars}"
 
 
 # calls action() when pressed
@@ -94,7 +97,7 @@ def listbox_used(event):
     print(listbox.get(listbox.curselection()))
 
 
-listbox = tkinter.Listbox(height=4)
+listbox = tkinter.Listbox(height=10)
 fruits = ["Apple", "Pear", "Orange", "Banana"]
 for item in fruits:
     listbox.insert(fruits.index(item), item)
