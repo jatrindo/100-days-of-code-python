@@ -11,10 +11,18 @@ WORK_MIN = 25
 SHORT_BREAK_MIN = 5
 LONG_BREAK_MIN = 20
 reps = 0
+timer = None
 
 # ---------------------------- TIMER RESET ------------------------------- #
 def reset_timer():
-    pass
+    window.after_cancel(timer)
+
+    global reps
+    reps = 0
+
+    canvas.itemconfig(timer_text, text="00:00")
+    title_label.config(text="Timer")
+    checkmarks_label.config(text="")
 
 # ---------------------------- TIMER MECHANISM ------------------------------- #
 def start_timer():
@@ -46,9 +54,13 @@ def count_down(count):
     time = f"{minutes:02d}:{seconds:02d}"
     canvas.itemconfig(timer_text, text=time)
     if count > 0:
-        window.after(10, count_down, count - 1)   # Call this function again after a second
+        global timer
+        timer = window.after(1000, count_down, count - 1)   # Call this function again after a second
     else:
         start_timer()
+        if reps % 2 == 0:
+            checkmarks = "✓" * (reps // 2)
+            checkmarks_label.config(text=checkmarks)
 
 # ---------------------------- UI SETUP ------------------------------- #
 window = tk.Tk()
@@ -59,8 +71,8 @@ window.config(padx=100, pady=50, bg=YELLOW)
 title_label = tk.Label(text="Timer", fg=GREEN, bg=YELLOW, font=(FONT_NAME, 28, "bold"))
 title_label.grid(row=0, column=1)
 
-checkmark_label = tk.Label(text="✓", fg=GREEN, bg=YELLOW, font=(FONT_NAME, 30, "bold"))
-checkmark_label.grid(row=3, column=1)
+checkmarks_label = tk.Label(fg=GREEN, bg=YELLOW, font=(FONT_NAME, 30, "bold"))
+checkmarks_label.grid(row=3, column=1)
 
 # Tomato Image with Timer
 canvas = tk.Canvas(width=200, height=224, bg=YELLOW, highlightthickness=0)
