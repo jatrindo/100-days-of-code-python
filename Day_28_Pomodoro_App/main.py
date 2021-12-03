@@ -11,15 +11,18 @@ WORK_MIN = 25
 SHORT_BREAK_MIN = 5
 LONG_BREAK_MIN = 20
 reps = 0
+total_count = 0
 timer = None
 
 # ---------------------------- TIMER RESET ------------------------------- #
 def reset_timer():
     window.after_cancel(timer)
 
-    global reps
+    global reps, total_count
     reps = 0
+    total_count = 0
 
+    total_time_spent_label.config(text="Total Time Spent: 00h 00m 00s")
     canvas.itemconfig(timer_text, text="00:00")
     title_label.config(text="Timer")
     checkmarks_label.config(text="")
@@ -46,9 +49,23 @@ def start_timer():
         title_label.config(text="Work", fg=GREEN)
         count_down(work_sec)
 
+# ---------------------------- COUNTUP MECHANISM ------------------------------- #
+def count_up():
+    # Update total time spent
+    global total_count
+    total_count += 1
+
+    total_hours = total_count // 3600
+    total_minutes = total_count // 60
+    total_seconds = total_count % 60
+    total_time_spent_label.config(text=f"Total Time Spent: "
+                                       f"{total_hours:02d}h {total_minutes:02d}m {total_seconds:02d}s")
+
 # ---------------------------- COUNTDOWN MECHANISM ------------------------------- #
 def count_down(count):
-    minutes = math.floor(count / 60)
+
+    # Update countdown
+    minutes = count // 60
     seconds = count % 60
 
     time = f"{minutes:02d}:{seconds:02d}"
@@ -56,6 +73,7 @@ def count_down(count):
     if count > 0:
         global timer
         timer = window.after(1000, count_down, count - 1)   # Call this function again after a second
+        window.after(1000, count_up)
     else:
         start_timer()
         if reps % 2 == 0:
@@ -73,6 +91,10 @@ title_label.grid(row=0, column=1)
 
 checkmarks_label = tk.Label(fg=GREEN, bg=YELLOW, font=(FONT_NAME, 30, "bold"))
 checkmarks_label.grid(row=3, column=1)
+
+total_time_spent_label = tk.Label(text="Total Time Spent: 00h 00m 00s",
+                                  fg=GREEN, bg=YELLOW, font=(FONT_NAME, 20, "bold"))
+total_time_spent_label.grid(row=4, column=0, columnspan=3)
 
 # Tomato Image with Timer
 canvas = tk.Canvas(width=200, height=224, bg=YELLOW, highlightthickness=0)
