@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import messagebox
 
 # ---------------------------- PASSWORD GENERATOR ------------------------------- #
 
@@ -11,12 +12,24 @@ def save():
     email = email_username_entry.get()
     password = password_entry.get()
 
-    with open(password_file, 'a') as f:
-        f.write(f"{website} | {email} | {password}\n")
+    if not website:
+        messagebox.showerror(title="Oops", message="Please provide a website!")
+        return
+    if not email:
+        messagebox.showerror(title="Oops", message="Please provide an email!")
+        return
 
-    # Reset the website, password fields
-    website_entry.delete(0, tk.END)
-    password_entry.delete(0, tk.END)
+    is_ok = messagebox.askokcancel(title=website, message=f"Okay to save password for the following?:\n"
+                                                          f"Website: {website}\n"
+                                                          f"Email: {email}")
+
+    if is_ok:
+        with open(password_file, 'a') as f:
+            f.write(f"{website} | {email} | {password}\n")
+
+        # Reset the website, password fields
+        website_entry.delete(0, tk.END)
+        password_entry.delete(0, tk.END)
 
 # ---------------------------- UI SETUP ------------------------------- #
 WHITE = "#FFFFFF"
