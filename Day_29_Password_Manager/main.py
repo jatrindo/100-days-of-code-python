@@ -76,6 +76,35 @@ def save():
     website_entry.delete(0, tk.END)
     password_entry.delete(0, tk.END)
 
+# ---------------------------- SEARCH PASSWORD ------------------------------- #
+def search_password():
+    website = website_entry.get()
+
+    if not website:
+        messagebox.showerror(title="Oops", message="Please provide a website!")
+        return
+
+    try:
+        with open(password_file, 'r') as f:
+            password_data = json.load(f)
+
+        entry = password_data.get(website)
+        if not entry:
+            messagebox.showerror(title=f"No Details", message=f"No details for {website} exist")
+            return
+
+        email = entry.get('email')
+        password = entry.get('password')
+
+        # Display Password
+        messagebox.showinfo(title=f"{website}", message=f"Website: {email}\n"
+                                                        f"Password: {password}")
+        # Copy to Clipboard
+        pyperclip.copy(password)
+    except FileNotFoundError:
+        messagebox.showerror(title="No Data File Found", message="No Data File Found")
+
+
 # ---------------------------- UI SETUP ------------------------------- #
 WHITE = "#FFFFFF"
 
@@ -103,8 +132,8 @@ password_label.grid(row=3, column=0)
 
 
 # Entries
-website_entry = tk.Entry(width=45)
-website_entry.grid(row=1, column=1, columnspan=2)
+website_entry = tk.Entry(width=25)
+website_entry.grid(row=1, column=1, columnspan=1)
 
 email_username_entry = tk.Entry(width=45)
 email_username_entry.insert(0, "example@mail.com")
@@ -115,6 +144,9 @@ password_entry.grid(row=3, column=1)
 
 
 # Buttons
+search_button = tk.Button(text="Search", command=search_password, width=16)
+search_button.grid(row=1, column=2)
+
 gen_password_button = tk.Button(text="Generate Password", command=generate_password)
 gen_password_button.grid(row=3, column=2)
 

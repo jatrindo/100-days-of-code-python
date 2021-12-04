@@ -1,2 +1,3 @@
 - Update Day 26 NATO Alphabet project to gracefully handle non-alphabet input
--
+- Update Day 29 Password Manager to gracefully handle "File Not Found" errors
+when saving and retrieving a password
