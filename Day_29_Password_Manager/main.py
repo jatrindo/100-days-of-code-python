@@ -1,3 +1,4 @@
+import json
 import tkinter as tk
 from tkinter import messagebox
 import random
@@ -29,7 +30,7 @@ def generate_password():
     pyperclip.copy(password)
 
 # ---------------------------- SAVE PASSWORD ------------------------------- #
-password_file = "data.txt"
+password_file = "data.json"
 
 
 def save():
@@ -40,6 +41,7 @@ def save():
     if not website:
         messagebox.showerror(title="Oops", message="Please provide a website!")
         return
+
     if not email:
         messagebox.showerror(title="Oops", message="Please provide an email!")
         return
@@ -48,13 +50,31 @@ def save():
                                                           f"Website: {website}\n"
                                                           f"Email: {email}")
 
-    if is_ok:
-        with open(password_file, 'a') as f:
-            f.write(f"{website} | {email} | {password}\n")
+    if not is_ok:
+        return
 
-        # Reset the website, password fields
-        website_entry.delete(0, tk.END)
-        password_entry.delete(0, tk.END)
+    new_data = {
+        website: {
+            "email": email,
+            "password": password
+        }
+    }
+
+    try:
+        # Read JSON from database
+        with open(password_file, 'r') as f:
+            password_data = json.load(f)
+    except FileNotFoundError:
+        password_data = {}
+
+    # Update database with new entry
+    password_data.update(new_data)
+    with open(password_file, 'w') as f:
+        json.dump(password_data, f, indent=4)
+
+    # Reset the website, password fields
+    website_entry.delete(0, tk.END)
+    password_entry.delete(0, tk.END)
 
 # ---------------------------- UI SETUP ------------------------------- #
 WHITE = "#FFFFFF"
