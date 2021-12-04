@@ -12,11 +12,13 @@ SHORT_BREAK_MIN = 5
 LONG_BREAK_MIN = 20
 reps = 0
 total_count = 0
-timer = None
+countdown_timer = None
+total_time_timer = None
 
 # ---------------------------- TIMER RESET ------------------------------- #
 def reset_timer():
-    window.after_cancel(timer)
+    window.after_cancel(countdown_timer)
+    window.after_cancel(total_time_timer)
 
     global reps, total_count
     reps = 0
@@ -71,9 +73,9 @@ def count_down(count):
     time = f"{minutes:02d}:{seconds:02d}"
     canvas.itemconfig(timer_text, text=time)
     if count > 0:
-        global timer
-        timer = window.after(1000, count_down, count - 1)   # Call this function again after a second
-        window.after(1000, count_up)
+        global countdown_timer, total_time_timer
+        countdown_timer = window.after(1000, count_down, count - 1)   # Call this function again after a second
+        total_time_timer = window.after(1000, count_up)
     else:
         start_timer()
         if reps % 2 == 0:
