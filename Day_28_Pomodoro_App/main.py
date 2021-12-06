@@ -58,7 +58,7 @@ def count_up():
     total_count += 1
 
     total_hours = total_count // 3600
-    total_minutes = total_count // 60
+    total_minutes = (total_count // 60) % 60
     total_seconds = total_count % 60
     total_time_spent_label.config(text=f"Total Time Spent: "
                                        f"{total_hours:02d}h {total_minutes:02d}m {total_seconds:02d}s")
