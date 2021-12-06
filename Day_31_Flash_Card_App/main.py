@@ -3,9 +3,14 @@ import pandas
 import random
 
 # ----- Word Retrieval
-database_path = "data/spanish_words.csv"
-database_data = pandas.read_csv(database_path)
-database_words = database_data.to_dict(orient='records')
+words_to_learn_path = "data/words_to_learn.csv"
+default_words_path = "data/spanish_words.csv"
+try:
+    database_data = pandas.read_csv(words_to_learn_path)
+except FileNotFoundError:
+    database_data = pandas.read_csv(default_words_path)
+
+words_to_learn = database_data.to_dict(orient='records')
 
 foreign_language = database_data.columns[0]
 native_language = database_data.columns[1]
@@ -14,8 +19,12 @@ flip_timer = None
 flip_time_ms = 3000
 
 
+# ----- Card Logic
+current_card = None
+
+
 def get_new_card():
-    return random.sample(database_words, 1)[0]
+    return random.sample(words_to_learn, 1)[0]
 
 
 def flip_card(language, word):
@@ -25,16 +34,16 @@ def flip_card(language, word):
 
 
 def display_new_card():
-    global flip_timer
+    global flip_timer, current_card
 
     # Cancel the previous flip timer if the user clicked a button fast
     if flip_timer:
         window.after_cancel(flip_timer)
 
     # Grab a card from the database
-    entry = get_new_card()
-    foreign_word = entry.get(foreign_language)
-    native_word = entry.get(native_language)
+    current_card = get_new_card()
+    foreign_word = current_card.get(foreign_language)
+    native_word = current_card.get(native_language)
 
     # Display Foreign word
     card_canvas.itemconfig(card_canvas_img, image=front_card_img)
@@ -45,12 +54,21 @@ def display_new_card():
     flip_timer = window.after(flip_time_ms, flip_card, native_language, native_word)
 
 
+# ----- Button Logic
 def wrong_button_pressed():
     display_new_card()
 
 
 def right_button_pressed():
+    # Remove the card shown from our list of words and update the database
+    if current_card:
+        words_to_learn.remove(current_card)
+        updated_words = pandas.DataFrame(words_to_learn)
+        updated_words.to_csv(words_to_learn_path, index=False)
+
+    # Show the new card
     display_new_card()
+
 
 # ----- UI Stuff -----
 BACKGROUND_COLOR = "#B1DDC6"
