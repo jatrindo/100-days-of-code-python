@@ -27,7 +27,7 @@ def reset_timer():
     total_time_spent_label.config(text="Total Time Spent: 00h 00m 00s")
     canvas.itemconfig(timer_text, text="00:00")
     window.title("Pomodoro")
-    title_label.config(text="Timer")
+    title_label.config(text="Timer", fg=GREEN)
     checkmarks_label.config(text="")
 
 # ---------------------------- TIMER MECHANISM ------------------------------- #
