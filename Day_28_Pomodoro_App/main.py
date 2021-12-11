@@ -26,6 +26,7 @@ def reset_timer():
 
     total_time_spent_label.config(text="Total Time Spent: 00h 00m 00s")
     canvas.itemconfig(timer_text, text="00:00")
+    window.title("Pomodoro")
     title_label.config(text="Timer")
     checkmarks_label.config(text="")
 
@@ -72,6 +73,7 @@ def count_down(count):
 
     time = f"{minutes:02d}:{seconds:02d}"
     canvas.itemconfig(timer_text, text=time)
+    window.title(f"{title_label.cget('text')}: {time}")
     if count > 0:
         global countdown_timer, total_time_timer
         countdown_timer = window.after(1000, count_down, count - 1)   # Call this function again after a second
