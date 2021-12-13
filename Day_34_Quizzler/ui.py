@@ -3,6 +3,8 @@ from quiz_brain import QuizBrain
 
 THEME_COLOR = "#375362"
 WHITE = "#FFFFFF"
+GREEN = "#00E000"
+RED = "#E00000"
 FONT = "Arial"
 
 
@@ -33,11 +35,13 @@ class QuizInterface:
 
         # Buttons
         true_img = tk.PhotoImage(file="images/true.png")
-        self.true_button = tk.Button(image=true_img, highlightthickness=0)
+        self.true_button = tk.Button(image=true_img, highlightthickness=0,
+                                     command=self.answer_true)
         self.true_button.grid(row=2, column=0)
 
         false_img = tk.PhotoImage(file="images/false.png")
-        self.false_button = tk.Button(image=false_img, highlightthickness=0)
+        self.false_button = tk.Button(image=false_img, highlightthickness=0,
+                                      command=self.answer_false)
         self.false_button.grid(row=2, column=1)
 
         self.get_next_question()
@@ -45,5 +49,28 @@ class QuizInterface:
         self.window.mainloop()
 
     def get_next_question(self):
-        q_text = self.quiz.next_question()
-        self.canvas.itemconfig(self.question_text, text=q_text)
+        self.canvas.config(bg=WHITE)
+        self.score_label.config(text=f"Score: {self.quiz.score}")
+
+        if self.quiz.still_has_questions():
+            q_text = self.quiz.next_question()
+            self.canvas.itemconfig(self.question_text, text=q_text)
+        else:
+            self.canvas.itemconfig(self.question_text,
+                                   text="You've reached the end of the quiz!")
+            self.true_button.config(state="disabled")
+            self.false_button.config(state="disabled")
+
+    def answer_true(self):
+        self.give_feedback(self.quiz.check_answer('True'))
+
+    def answer_false(self):
+        self.give_feedback(self.quiz.check_answer('False'))
+
+    def give_feedback(self, is_right):
+        if is_right:
+            self.canvas.config(bg=GREEN)
+        else:
+            self.canvas.config(bg=RED)
+
+        self.window.after(1000, self.get_next_question)
