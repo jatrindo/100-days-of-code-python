@@ -17,9 +17,9 @@ user_params = {
 # print(response.text)
 
 graph_endpoint = f"{user_endpoint}/{USERNAME}/graphs"
-graph_id = "graph1"
+GRAPH_ID = "graph1"
 graph_params = {
-    'id': graph_id,
+    'id': GRAPH_ID,
     'name': 'Test Graph',
     'unit': 'Minutes',
     'type': 'int',
@@ -34,7 +34,7 @@ graph_headers = {
 # print(response.text)
 
 
-add_pixel_endpoint = f"{user_endpoint}/{USERNAME}/graphs/{graph_id}"
+add_pixel_endpoint = f"{user_endpoint}/{USERNAME}/graphs/{GRAPH_ID}"
 
 date = dt.datetime(year=2021, month=12, day=16).strftime("%Y%m%d")
 print(f"date: {date}")
@@ -51,4 +51,21 @@ add_pixel_headers = {
 # response = requests.post(url=add_pixel_endpoint, json=add_pixel_params, headers=add_pixel_headers)
 # print(response.text)
 
-# TODO: Update yesterday's pixel to a different value
+
+# Update a Pixel
+today = dt.datetime.today().strftime("%Y%m%d")
+update_endpoint = f"{user_endpoint}/{USERNAME}/graphs/{GRAPH_ID}/{today}"
+
+new_pixel_data = {
+    "quantity": input("How many minutes did you read today? ")
+}
+
+response = requests.put(url=update_endpoint, json=new_pixel_data, headers=graph_headers)
+response.raise_for_status()
+print(response.text)
+
+
+# Delete a pixel
+response = requests.delete(url=update_endpoint, headers=graph_headers)
+response.raise_for_status()
+print(response.text)
