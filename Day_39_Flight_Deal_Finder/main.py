@@ -1,6 +1,8 @@
 # This file will need to use the DataManager, FlightSearch, FlightData,
 # NotificationManager classes to achieve the program requirements.
 import os
+import datetime as dt
+import sys
 
 from data_manager import DataManager
 from city_search import CitySearch
@@ -15,7 +17,7 @@ SHEETY_SHEET_URL = os.environ.get("SHEETY_SHEET_URL")
 
 # Flight search
 TEQUILA_API_KEY = os.environ.get("TEQUILA_API_KEY")
-TEQUILA_API_ENDPOINT = "tequila-api.kiwi.com/"
+TEQUILA_API_ENDPOINT = "https://tequila-api.kiwi.com"
 TEQUILA_SEARCH_ENDPOINT = f"{TEQUILA_API_ENDPOINT}/v2/search"
 FLY_FROM_CITY_IATA = os.environ.get("FLY_FROM_CITY_IATA")
 
@@ -33,35 +35,47 @@ flight_search = FlightSearch(TEQUILA_SEARCH_ENDPOINT, TEQUILA_API_KEY)
 sms_notifier = NotificationManager(TWILIO_ACC_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM_PHONE)
 
 # Get city rows from sheet
-cities = data_sheet.get_rows()
+# cities = data_sheet.get_rows().get("prices")
+cities = [{'city': 'Paris', 'iataCode': 'PAR', 'lowestPrice': 54, 'id': 2}, {'city': 'Berlin', 'iataCode': '', 'lowestPrice': 42, 'id': 3}, {'city': 'Tokyo', 'iataCode': '', 'lowestPrice': 485, 'id': 4}, {'city': 'Sydney', 'iataCode': '', 'lowestPrice': 551, 'id': 5}, {'city': 'Istanbul', 'iataCode': '', 'lowestPrice': 95, 'id': 6}, {'city': 'Kuala Lumpur', 'iataCode': '', 'lowestPrice': 414, 'id': 7}, {'city': 'New York', 'iataCode': 'NYC', 'lowestPrice': 240, 'id': 8}, {'city': 'San Francisco', 'iataCode': '', 'lowestPrice': 260, 'id': 9}, {'city': 'Cape Town', 'iataCode': '', 'lowestPrice': 378, 'id': 10}]
 
 # For each city that's missing an IATA code, search for them and update the sheet accordingly
 for i, city in enumerate(cities):
-    # For now if we don't have a city IATA code, just remove it from our list
-    if not city.get("IATA Code"):
-        cities.remove(city)
-
-    # TODO: Finish up the following
-    # if not city.get("IATA Code"):
+    pass
+    # TODO: If an IATA code is missing, update the sheet
+    # if not city.get("iataCode"):
     #     # Use TEQUILA Location API to get city IATA codes
     #     city_iata_code = city_search.get_city_code(city.get("name"))
     #     # Update the city object with the iata code
-    #     city["IATA Code"] = city_iata_code
+    #     city["iataCode"] = city_iata_code
     #     # Use the updated city object to update the sheet row
     #     data_sheet.update_rows()
 
-# Search for cheapest flights from tomorrow to 6 months later for each city
-# TODO: Get date string in dd/mm/yyy format
-tomorrow = None
-# TODO: Get date string in dd/mm/yyy format
-six_months_after = None
+print(cities)
 
+# Search for cheapest flights from tomorrow to 6 months later for each city
+# Note: We estimate 6 months after as 6 * 4 = 24 weeks
+tomorrow = (dt.datetime.today() + dt.timedelta(days=1)).strftime("%d/%m/%Y")
+six_months_after = (dt.datetime.today() + dt.timedelta(weeks=24)).strftime("%d/%m/%Y")
+
+# Begin searching for flights
 search_results = []
 for city in cities:
-    flightData = FlightData(FLY_FROM_CITY_IATA, city.get("IATA Code"),
-                            tomorrow, six_months_after)
-    search_results.append(flight_search.search_flight(flightData))
+    if not city.get("iataCode"):
+        continue
 
+    print(f"Searching flights to {city.get('city')} cheaper than {city.get('lowestPrice')}...")
+    result = flight_search.search_flights_cheaper_than(
+        FLY_FROM_CITY_IATA,
+        city.get("iataCode"),
+        tomorrow,
+        six_months_after,
+        city.get("lowestPrice")
+    )
+
+    if result:
+        search_results.append(result)
+
+print(search_results)
 
 # For each search result, if the price of the city is lower than the
 # price listed in the Google sheet, send an SMS
