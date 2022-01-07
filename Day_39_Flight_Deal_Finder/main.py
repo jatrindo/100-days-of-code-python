@@ -42,6 +42,7 @@ cities = [{'city': 'Paris', 'iataCode': 'PAR', 'lowestPrice': 54, 'id': 2}, {'ci
 for i, city in enumerate(cities):
     pass
     # TODO: If an IATA code is missing, update the sheet
+    # (Note: use the 'id' field)
     # if not city.get("iataCode"):
     #     # Use TEQUILA Location API to get city IATA codes
     #     city_iata_code = city_search.get_city_code(city.get("name"))
@@ -50,7 +51,7 @@ for i, city in enumerate(cities):
     #     # Use the updated city object to update the sheet row
     #     data_sheet.update_rows()
 
-print(cities)
+print(f"Got {len(cities)} cities from sheet")
 
 # Search for cheapest flights from tomorrow to 6 months later for each city
 # Note: We estimate 6 months after as 6 * 4 = 24 weeks
@@ -58,12 +59,12 @@ tomorrow = (dt.datetime.today() + dt.timedelta(days=1)).strftime("%d/%m/%Y")
 six_months_after = (dt.datetime.today() + dt.timedelta(weeks=24)).strftime("%d/%m/%Y")
 
 # Begin searching for flights
-search_results = []
+available_flights = {}
 for city in cities:
     if not city.get("iataCode"):
         continue
 
-    print(f"Searching flights to {city.get('city')} cheaper than {city.get('lowestPrice')}...")
+    print(f"Searching flights to {city.get('city')} cheaper than ${city.get('lowestPrice')}...")
     result = flight_search.search_flights_cheaper_than(
         FLY_FROM_CITY_IATA,
         city.get("iataCode"),
@@ -73,10 +74,31 @@ for city in cities:
     )
 
     if result:
-        search_results.append(result)
+        available_flights[city.get("city")] = result
 
-print(search_results)
+print(f"Found cheap flights to {len(available_flights)} cities!")
+if not available_flights:
+    sys.exit(0)
 
 # For each search result, if the price of the city is lower than the
 # price listed in the Google sheet, send an SMS
-# TODO: Figure out looping (zip?)
+message_limit = 3
+for (city, flights) in available_flights.items():
+    print(f"{len(flights)} cheap flights available to {city}")
+    print(f"Sending up to {message_limit} flights to: {city}")
+
+    for (i, flight) in enumerate(flights):
+        if i >= 3:
+            break
+
+        message = (
+            f"Low price alert! "
+            f"Only ${flight.price} to fly from "
+            f"{flight.city_from}-{flight.fly_from_iata} to "
+            f"{flight.city_to}-{flight.fly_to_iata}, from "
+            f"{flight.start_date} to {flight.end_date}"
+        )
+
+        print(message)
+
+        # TODO: Send SMS message to phone
