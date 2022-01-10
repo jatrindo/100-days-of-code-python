@@ -35,9 +35,9 @@ for row in rows:
 print(f"Got {len(rows)} cities from sheet")
 
 # Search for cheapest flights from tomorrow to 6 months later for each city
-# Note: We estimate 6 months after as 6 * 4 = 24 weeks
+# Note: We estimate 6 months as 6 * 30 = 180 days
 tomorrow = (dt.datetime.today() + dt.timedelta(days=1)).strftime("%d/%m/%Y")
-six_months_after = (dt.datetime.today() + dt.timedelta(weeks=24)).strftime("%d/%m/%Y")
+six_months_after = (dt.datetime.today() + dt.timedelta(days=180)).strftime("%d/%m/%Y")
 
 # Search for flights and send a message if any are found
 message_limit = 1
