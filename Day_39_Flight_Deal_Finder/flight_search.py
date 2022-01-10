@@ -1,17 +1,38 @@
+import os
 import requests
 
 from flight_data import FlightData
 
+TEQUILA_API_KEY = os.environ.get("TEQUILA_API_KEY")
+
+TEQUILA_API_ENDPOINT = "https://tequila-api.kiwi.com"
+TEQUILA_LOCATION_SEARCH_ENDPOINT = f"{TEQUILA_API_ENDPOINT}/locations/query"
+TEQUILA_FLIGHT_SEARCH_ENDPOINT = f"{TEQUILA_API_ENDPOINT}/v2/search"
+
 
 class FlightSearch:
     # This class is responsible for talking to the Flight Search API.
-    def __init__(self, search_endpoint_url, api_key):
-        self.search_endpoint_url = search_endpoint_url
-        self.api_key = api_key
+
+    def get_city_code(self, city_name):
+        # Retrieve the CITY IATA code
+        headers = {
+            "apikey": TEQUILA_API_KEY,
+        }
+
+        params = {
+            "term": city_name
+        }
+
+        response = requests.get(TEQUILA_LOCATION_SEARCH_ENDPOINT, params=params, headers=headers)
+        response.raise_for_status()
+        json_data = response.json()
+        location = json_data.get("locations")[0]
+
+        return location.get("code")
 
     def search_flights_cheaper_than(self, fly_from, fly_to, date_from, date_to, price):
         headers = {
-            "apikey": self.api_key
+            "apikey": TEQUILA_API_KEY
         }
 
         params = {
@@ -23,7 +44,7 @@ class FlightSearch:
             "price_to": price
         }
 
-        response = requests.get(self.search_endpoint_url, params=params, headers=headers)
+        response = requests.get(TEQUILA_FLIGHT_SEARCH_ENDPOINT, params=params, headers=headers)
         response.raise_for_status()
         json_data = response.json()
 

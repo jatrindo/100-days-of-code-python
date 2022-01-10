@@ -1,38 +1,20 @@
 # This file will need to use the DataManager, FlightSearch, FlightData,
 # NotificationManager classes to achieve the program requirements.
-import os
 import datetime as dt
-import sys
+import os
 
 from data_manager import DataManager
-from city_search import CitySearch
 from flight_search import FlightSearch
 from notification_manager import NotificationManager
 
 # Globals
-# Data management
-SHEETY_TOKEN = os.environ.get("SHEETY_TOKEN")
-SHEETY_SHEET_URL = os.environ.get("SHEETY_SHEET_URL")
-
-# Flight search
-TEQUILA_API_KEY = os.environ.get("TEQUILA_API_KEY")
-TEQUILA_API_ENDPOINT = "https://tequila-api.kiwi.com"
-TEQUILA_LOCATION_SEARCH_ENDPOINT = f"{TEQUILA_API_ENDPOINT}/locations/query"
-TEQUILA_FLIGHT_SEARCH_ENDPOINT = f"{TEQUILA_API_ENDPOINT}/v2/search"
-FLY_FROM_CITY_IATA = os.environ.get("FLY_FROM_CITY_IATA")
-
-# SMS messaging
-TWILIO_ACC_SID = os.environ.get("TWILIO_ACC_SID")
-TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN")
-TWILIO_FROM_PHONE = os.environ.get("TWILIO_FROM_PHONE")
-TWILIO_TO_PHONE = os.environ.get("TWILIO_TO_PHONE")
-
+FROM_CITY_IATA = os.environ.get("FROM_CITY_IATA")
+TO_PHONE = os.environ.get("TO_PHONE")
 
 # Initialize Objects
-data_sheet = DataManager(SHEETY_SHEET_URL, SHEETY_TOKEN)
-city_search = CitySearch(TEQUILA_LOCATION_SEARCH_ENDPOINT, TEQUILA_API_KEY)
-flight_search = FlightSearch(TEQUILA_FLIGHT_SEARCH_ENDPOINT, TEQUILA_API_KEY)
-sms_notifier = NotificationManager(TWILIO_ACC_SID, TWILIO_AUTH_TOKEN, TWILIO_FROM_PHONE)
+data_sheet = DataManager()
+flight_search = FlightSearch()
+sms_notifier = NotificationManager()
 
 # Get city rows from sheet
 rows = data_sheet.get_rows().get("prices")
@@ -44,7 +26,7 @@ for row in rows:
         print(f"Row for {row.get('city')} is missing an IATA code. Fetching...")
 
         # Use TEQUILA Location API to get city IATA codes
-        city_iata_code = city_search.get_city_code(row.get("city"))
+        city_iata_code = flight_search.get_city_code(row.get("city"))
         print(f"Fetched! IATA code is: {city_iata_code}")
 
         # Use the updated city object to update the sheet row
@@ -65,7 +47,7 @@ for row in rows:
 
     print(f"\nSearching flights to {row.get('city')} cheaper than ${row.get('lowestPrice')}...")
     available_flights = flight_search.search_flights_cheaper_than(
-        FLY_FROM_CITY_IATA,
+        FROM_CITY_IATA,
         row.get("iataCode"),
         tomorrow,
         six_months_after,
@@ -89,6 +71,6 @@ for row in rows:
                 f"{flight.start_date} to {flight.end_date}"
             )
 
-            sms_notifier.send_sms_message(message, TWILIO_TO_PHONE)
+            sms_notifier.send_sms_message(message, TO_PHONE)
     else:
         print(f"No cheap flights found to {row.get('city')}")

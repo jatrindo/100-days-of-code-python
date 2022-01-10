@@ -1,5 +1,6 @@
 from dateutil import parser
 
+
 class FlightData:
     # This class is responsible for structuring the data of the flight
     # itineraries we could follow
