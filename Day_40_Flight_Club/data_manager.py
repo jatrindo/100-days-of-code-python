@@ -3,6 +3,8 @@ import requests
 
 SHEETY_TOKEN = os.environ.get("SHEETY_TOKEN")
 SHEETY_SHEET_URL = os.environ.get("SHEETY_SHEET_URL")
+PRICES_SHEET_URL = f"{SHEETY_SHEET_URL}/prices"
+USERS_SHEET_URL = f"{SHEETY_SHEET_URL}/users"
 
 
 class DataManager:
@@ -13,7 +15,7 @@ class DataManager:
             "Authorization": f"Bearer {SHEETY_TOKEN}"
         }
 
-        response = requests.get(SHEETY_SHEET_URL, headers=headers)
+        response = requests.get(PRICES_SHEET_URL, headers=headers)
         response.raise_for_status()
         return response.json()
 
@@ -30,5 +32,21 @@ class DataManager:
             }
         }
 
-        response = requests.put(f"{SHEETY_SHEET_URL}/{row_id}", headers=headers, json=body)
+        response = requests.put(f"{PRICES_SHEET_URL}/{row_id}", headers=headers, json=body)
+        response.raise_for_status()
+
+    def add_customer(self, first_name, last_name, email):
+        headers = {
+            "Authorization": f"Bearer {SHEETY_TOKEN}",
+        }
+
+        body = {
+            "user": {
+                "firstName": first_name,
+                "lastName": last_name,
+                "email": email
+            }
+        }
+
+        response = requests.post(f"{USERS_SHEET_URL}", headers=headers, json=body)
         response.raise_for_status()
