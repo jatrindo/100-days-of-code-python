@@ -40,8 +40,14 @@ class FlightSearch:
             "fly_to": fly_to,
             "date_from": date_from,
             "date_to": date_to,
+            "nights_in_dst_from": 7,
+            "nights_in_dst_to": 28,
+            "flight_type": "round",
+            "one_for_city": 1,
+            "max_stopovers": 0,
             "price_from": 0,
-            "price_to": price
+            "price_to": price,
+            "curr": "USD"
         }
 
         response = requests.get(TEQUILA_FLIGHT_SEARCH_ENDPOINT, params=params, headers=headers)
