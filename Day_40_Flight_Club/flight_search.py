@@ -54,9 +54,33 @@ class FlightSearch:
         response.raise_for_status()
         json_data = response.json()
 
-        # print(json_data)
         itineraries = json_data.get("data")
 
-        # For each itinerary present in the response, create a FlightData
-        # object
-        return [FlightData(itinerary) for itinerary in itineraries]
+        if itineraries:
+            # For each itinerary present in the response, create a FlightData
+            # object
+            return [FlightData(itinerary) for itinerary in itineraries]
+
+        # If a flight is not found, check to see if there are flights with 1 stop
+        max_stopovers = 1
+        params["max_stopovers"] = max_stopovers
+
+        print(f"No direct flights found. Searching again but for flights with "
+              f"at most {max_stopovers} stopover(s)...")
+        response = requests.get(TEQUILA_FLIGHT_SEARCH_ENDPOINT, params=params, headers=headers)
+        response.raise_for_status()
+        json_data = response.json()
+
+        itineraries = json_data.get("data")
+        if not itineraries:
+            print("Still no flights found!")
+            return []
+
+        return [
+            FlightData(
+                itinerary,
+                stop_overs=max_stopovers,
+                via_city=itinerary.get("route")[0].get("cityTo")
+            )
+            for itinerary in itineraries
+        ]

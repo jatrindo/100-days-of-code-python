@@ -4,7 +4,7 @@ from dateutil import parser
 class FlightData:
     # This class is responsible for structuring the data of the flight
     # itineraries we could follow
-    def __init__(self, data):
+    def __init__(self, data, stop_overs=0, via_city=""):
         self.data = data
 
         self.price = data.get('price')
@@ -19,5 +19,8 @@ class FlightData:
 
         self.start_date = parser.parse(data.get('local_departure')).date()
         self.end_date = parser.parse(data.get('local_arrival')).date()
+
+        self.stop_overs = stop_overs
+        self.via_city = via_city
 
         self.route = data.get('route')

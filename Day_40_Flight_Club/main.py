@@ -39,13 +39,25 @@ def resolve_missing_iata_codes(rows):
 
 def send_sms_for_flights(flights):
     for flight in flights:
-        message = (
-            f"Low price alert! "
-            f"Only ${flight.price} to fly from "
-            f"{flight.city_from}-{flight.fly_from_iata} to "
-            f"{flight.city_to}-{flight.fly_to_iata}, from "
-            f"{flight.start_date} to {flight.end_date}"
-        )
+        if flight.stop_overs == 0:
+            message = (
+                f"Low price alert! "
+                f"Only ${flight.price} to fly from "
+                f"{flight.city_from}-{flight.fly_from_iata} to "
+                f"{flight.city_to}-{flight.fly_to_iata}, from "
+                f"{flight.start_date} to {flight.end_date}"
+            )
+        else:
+            message = (
+                f"Low price alert! "
+                f"Only ${flight.price} to fly from "
+                f"{flight.city_from}-{flight.fly_from_iata} to "
+                f"{flight.city_to}-{flight.fly_to_iata}, from "
+                f"{flight.start_date} to {flight.end_date}\n\n"
+                f"Flight has {flight.stop_overs} stop over, "
+                f"via {flight.via_city}"
+            )
+
         sms_notifier.send_sms_message(message, TO_PHONE)
 
 
