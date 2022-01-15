@@ -75,8 +75,8 @@ def send_emails_for_flights(flights):
         message += (
             f"\n\nGoogle Flight Link: "
             f"https://www.google.co.uk/flights?hl=en#"
-            f"flt={flight.city_from_iata}.{flight.city_to_iata}.{flight.start_date}*"
-            f"{flight.city_to_iata}.{flight.city_from_iata}.{flight.end_date}"
+            f"flt={flight.fly_from_iata}.{flight.fly_to_iata}.{flight.start_date}*"
+            f"{flight.fly_to_iata}.{flight.fly_from_iata}.{flight.end_date}"
         )
 
         # Send the alert to each customer email
