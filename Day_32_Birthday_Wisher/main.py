@@ -35,7 +35,8 @@ def send_email(sender_email, sender_password, sending_smtp_server_url, recipient
 # Check if today matches a birthday in the birthdays.csv
 now = dt.datetime.now()
 birthdays_df = pandas.read_csv(BIRTHDAYS_CSV)
-todays_birthdays = birthdays_df[birthdays_df.month == now.month][birthdays_df.day == now.day]
+todays_birthdays = birthdays_df[(birthdays_df.month == now.month) &
+                                (birthdays_df.day == now.day)]
 
 
 # If step 2 is true, pick a random letter from letter templates and replace
