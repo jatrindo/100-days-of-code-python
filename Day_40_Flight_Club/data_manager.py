@@ -50,3 +50,12 @@ class DataManager:
 
         response = requests.post(f"{USERS_SHEET_URL}", headers=headers, json=body)
         response.raise_for_status()
+
+    def get_customers(self):
+        headers = {
+            "Authorization": f"Bearer {SHEETY_TOKEN}",
+        }
+
+        response = requests.get(f"{USERS_SHEET_URL}", headers=headers)
+        response.raise_for_status()
+        return response.json()

@@ -15,12 +15,12 @@ TO_PHONE = os.environ.get("TO_PHONE")
 # Note: We estimate 6 months as 6 * 30 = 180 days
 search_start_date = (dt.datetime.today() + dt.timedelta(days=1)).strftime("%d/%m/%Y")
 search_end_date = (dt.datetime.today() + dt.timedelta(days=180)).strftime("%d/%m/%Y")
-sms_limit_per_city = 1
+msg_limit_per_city = 1
 
 # Initialize Objects
 data_sheet = DataManager()
 flight_search = FlightSearch()
-sms_notifier = NotificationManager()
+notifier = NotificationManager()
 
 
 def resolve_missing_iata_codes(rows):
@@ -39,26 +39,50 @@ def resolve_missing_iata_codes(rows):
 
 def send_sms_for_flights(flights):
     for flight in flights:
-        if flight.stop_overs == 0:
-            message = (
-                f"Low price alert! "
-                f"Only ${flight.price} to fly from "
-                f"{flight.city_from}-{flight.fly_from_iata} to "
-                f"{flight.city_to}-{flight.fly_to_iata}, from "
-                f"{flight.start_date} to {flight.end_date}"
-            )
-        else:
-            message = (
-                f"Low price alert! "
-                f"Only ${flight.price} to fly from "
-                f"{flight.city_from}-{flight.fly_from_iata} to "
-                f"{flight.city_to}-{flight.fly_to_iata}, from "
-                f"{flight.start_date} to {flight.end_date}\n\n"
-                f"Flight has {flight.stop_overs} stop over, "
+        message = (
+            f"Low price alert! "
+            f"Only ${flight.price} to fly from "
+            f"{flight.city_from}-{flight.fly_from_iata} to "
+            f"{flight.city_to}-{flight.fly_to_iata}, from "
+            f"{flight.start_date} to {flight.end_date}"
+        )
+
+        if flight.stop_overs > 0:
+            message += (
+                f"\n\nFlight has {flight.stop_overs} stop over, "
                 f"via {flight.via_city}"
             )
 
-        sms_notifier.send_sms_message(message, TO_PHONE)
+        notifier.send_sms_message(message, TO_PHONE)
+
+
+def send_emails_for_flights(flights):
+    for flight in flights:
+        message = (
+            f"Subject:Low Price Flight Alert! (to {flight.city_to})\n\n"
+            f"Only ${flight.price} to fly from "
+            f"{flight.city_from}-{flight.fly_from_iata} to "
+            f"{flight.city_to}-{flight.fly_to_iata}, from "
+            f"{flight.start_date} to {flight.end_date}"
+        )
+
+        if flight.stop_overs > 0:
+            message += (
+                f"\n\nFlight has {flight.stop_overs} stop over, "
+                f"via {flight.via_city}"
+            )
+
+        message += (
+            f"\n\nGoogle Flight Link: "
+            f"https://www.google.co.uk/flights?hl=en#"
+            f"flt={flight.city_from_iata}.{flight.city_to_iata}.{flight.start_date}*"
+            f"{flight.city_to_iata}.{flight.city_from_iata}.{flight.end_date}"
+        )
+
+        # Send the alert to each customer email
+        customer_data = data_sheet.get_customers()
+        customer_emails = [user.get("email") for user in customer_data.get("users")]
+        notifier.send_emails(customer_emails, message)
 
 
 def find_deals_and_notify():
@@ -87,8 +111,9 @@ def find_deals_and_notify():
 
         print(f"{len(available_flights)} cheap flights available to {row.get('city')}")
         if available_flights:
-            print(f"Sending SMS message for first {sms_limit_per_city} flight(s)")
-            send_sms_for_flights(available_flights[:sms_limit_per_city])
+            print(f"Sending messages for first {msg_limit_per_city} cheap flight(s)")
+            # send_sms_for_flights(available_flights[:msg_limit_per_city])
+            send_emails_for_flights(available_flights[:msg_limit_per_city])
 
 
 find_deals_and_notify()
